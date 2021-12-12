@@ -41,19 +41,23 @@ if ($card->rowCount() == 0){
             $html = $html."<h1>Místnost č. ".htmlspecialchars($row['no'])."</h1><dt>Číslo</dt><dd>".htmlspecialchars($row['no'])."</dd><dt>Název</dt><dd>".htmlspecialchars($row['name'])."</dd><dt>Telefon</dt><dd>".htmlspecialchars($row['phone'])."</dd><dt>Lidé</dt>";
         }
 
-        $employees = $pdo->query('SELECT AVG(e.wage) as avgwage, e.name AS ename, e.surname, e.employee_id FROM employee e INNER JOIN room r ON e.room=r.room_id WHERE r.room_id='.$roomId);
+        $employees = $pdo->query('SELECT e.wage, e.name AS ename, e.surname, e.employee_id FROM employee e INNER JOIN room r ON e.room=r.room_id WHERE r.room_id='.$roomId);
 
         while ($row = $employees->fetch()){
         $html = $html."<dd><a style='text-decoration:none' href='employee.php?employeeId={$row['employee_id']}'>".htmlspecialchars($row['surname'])." ".substr($row['ename'], 0, 1).".</a></dd>";
-        $html = $html."<dt>Průměrná mzda<dt><dd>".htmlspecialchars($row['avgwage'])."</dd>";
         }
-        $html = $html."<dt>Klíče</dt>";
 
+        $avgwage = $pdo->query('SELECT AVG(e.wage) AS avgwage FROM employee e INNER JOIN room r ON e.room=r.room_id WHERE r.room_id='.$roomId);
+        
+        while ($row = $avgwage->fetch()){
+        $html = $html."<dt>Průměrná mzda<dt><dd>".htmlspecialchars($row['avgwage'])."</dd>"; 
+        }
+
+        $html = $html."<dt>Klíče</dt>";
         $keys = $pdo->query('SELECT e.employee_id, e.name AS ename, e.surname FROM `key` k INNER JOIN employee e ON e.employee_id=k.employee WHERE k.room ='.$roomId);
 
         while ($row = $keys->fetch()){
-            $html = $html."<dd><a style='text-decoration:none' href='employee.php?employeeId={$row['employee_id']}'>".htmlspecialchars($row['surname'])." ".substr(htmlspecialchars($row['ename']), 0, 1).".</a></dd>";
-
+        $html = $html."<dd><a style='text-decoration:none' href='employee.php?employeeId={$row['employee_id']}'>".htmlspecialchars($row['surname'])." ".substr(htmlspecialchars($row['ename']), 0, 1).".</a></dd>";
         }
         $html = $html."<br><h3><a style='text-decoration:none' href=rooms.php>Zpět na \"Seznam místností <i class='bi bi-grid-fill'></i>\"</a></h3>";
         echo $html;
